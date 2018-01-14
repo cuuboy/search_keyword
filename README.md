@@ -6,6 +6,24 @@
 gem install rspec
 ```
 
+## How to use it
+
+* Obtain this code into your project and call SearchService, SearchRecord must be visible from SearchService.
+* Example:
+```ruby
+records = SearchService.new('fixtures/projects.json').find!('example')
+```
+and your should be able to get records with this contain:
+```ruby
+#<SearchRecord:0x007fb06a159ba0
+  @path=["The 1 Element", "At attribute \"url\"", "http://example.com/projects-1"]>
+```
+If you want to get the report string:
+```ruby
+puts record.result
+# Found at: The 1 Element > At attribute url > http://example.com/projects-1
+```
+
 ## How to Run The Test
 
 * RSpec is required
