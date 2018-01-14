@@ -1,4 +1,5 @@
 require './search_data.rb'
+require 'json'
 
 FileNotExistError = StandardError.new("File does not exist.")
 
@@ -7,38 +8,37 @@ class SearchService
         raise FileNotExistError unless File.exists?(document_path)
         @document_path = document_path
     end
+
+    def document
+        @_document ||= JSON.parse(File.read(@document_path))
+    end
     
     def find!(key_word)
+        datas = []
+
         data = SearchData.new
         exam_seq = 0
         
-        file = File.open(@document_path, 'r')
+        puts dig_find(document, key_word.to_s)
 
-        file.each_char do |c|
-            if c == "\n" 
-                data.move_line
-            else
-                data.move_char
-            end
-
-            if key_word[exam_seq] == c
-                exam_seq += 1
-            else
-                exam_seq = 0
-            end
-
-            if exam_seq >= key_word.size
-                data.found!
-                break 
-            end
-        end
-
-        file.close
-        
         return data
     end
 
     private
 
     attr_reader :document_path
+
+    def dig_find(obj, target, path = [])
+        if obj.kind_of?(Array)
+            return obj.each_with_index.map do |value, index|
+                dig_find(value, target, path + ["The #{index+1} Element"])
+            end
+        elsif obj.kind_of?(Hash)
+            return obj.map do |key, object|
+                dig_find(object, target, path + ["At attribute \"#{key}\""])
+            end
+        else
+            return "#{path.join(" + ")}: #{obj}" if obj.to_s.include?(target)
+        end
+    end
 end
