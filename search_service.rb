@@ -1,4 +1,4 @@
-require './search_data.rb'
+require './search_record.rb'
 require 'json'
 
 FileNotExistError = StandardError.new("File does not exist.")
@@ -14,14 +14,7 @@ class SearchService
     end
     
     def find!(key_word)
-        datas = []
-
-        data = SearchData.new
-        exam_seq = 0
-        
-        puts dig_find(document, key_word.to_s)
-
-        return data
+        return dig_find(document, key_word.to_s)
     end
 
     private
@@ -32,13 +25,15 @@ class SearchService
         if obj.kind_of?(Array)
             return obj.each_with_index.map do |value, index|
                 dig_find(value, target, path + ["The #{index+1} Element"])
-            end
+            end.flatten.compact
         elsif obj.kind_of?(Hash)
             return obj.map do |key, object|
-                dig_find(object, target, path + ["At attribute \"#{key}\""])
-            end
+                dig_find(object, target, path + ["At attribute #{key}"])
+            end.flatten.compact
         else
-            return "#{path.join(" + ")}: #{obj}" if obj.to_s.include?(target)
+            if obj.to_s.include?(target)
+               return SearchRecord.new(path + [obj])
+            end
         end
     end
 end
